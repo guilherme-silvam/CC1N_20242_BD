@@ -40,64 +40,102 @@ CREATE TABLE IF NOT EXISTS RESERVAS (
     FOREIGN KEY (VOO_ID) REFERENCES VOOS(VOO_ID)
 );
 
--- ETAPA 4: ALTERAÇÕES NAS TABELAS UTILIZANDO ALTER TABLE
-
--- 1. CREATE: Criar um banco de dados e tabelas
-CREATE DATABASE COMPANHIA_AEREA;
-
+-- ETAPA 4: SELECIONAR O NOVO BANCO DE DADOS
 USE COMPANHIA_AEREA;
 
-CREATE TABLE VOOS (
-    voo_id INT AUTO_INCREMENT PRIMARY KEY,
-    companhia VARCHAR(100) NOT NULL,
-    origem VARCHAR(100),
-    destino VARCHAR(100),
-    data_voo DATE,
-    passageiros INT
+-- ETAPA 5: CRIAR AS TABELAS RELACIONADAS À COMPANHIA AÉREA
+
+-- Tabela AERONAVES
+CREATE TABLE IF NOT EXISTS AERONAVES (
+    AERONAVE_ID INT PRIMARY KEY AUTO_INCREMENT,
+    MODELO VARCHAR(50) NOT NULL,
+    CAPACIDADE INT NOT NULL
 );
 
--- Criar outra tabela como exemplo
-CREATE TABLE AERONAVES (
-    aeronave_id INT AUTO_INCREMENT PRIMARY KEY,
-    modelo VARCHAR(100),
-    capacidade INT,
-    ano_fabricacao YEAR
+-- Índice para busca rápida por MODELO em AERONAVES
+CREATE INDEX idx_modelo ON AERONAVES (MODELO);
+
+-- Tabela VOOS
+CREATE TABLE IF NOT EXISTS VOOS (
+    VOO_ID INT PRIMARY KEY AUTO_INCREMENT,
+    NUMERO_VOO VARCHAR(10) NOT NULL,
+    DESTINO VARCHAR(50) NOT NULL,
+    ORIGEM VARCHAR(50) NOT NULL,
+    AERONAVE_ID INT,
+    FOREIGN KEY (AERONAVE_ID) REFERENCES AERONAVES(AERONAVE_ID)
 );
 
--- 2. ALTER: Modificar tabelas já existentes
--- Adicionar uma nova coluna na tabela VOOS
-ALTER TABLE VOOS ADD tempo_estimado INT;
+-- Índice para busca rápida por NUMERO_VOO em VOOS
+CREATE INDEX idx_numero_voo ON VOOS (NUMERO_VOO);
 
--- Remover uma coluna da tabela AERONAVES
-ALTER TABLE AERONAVES DROP COLUMN ano_fabricacao;
+-- Tabela PASSAGEIROS
+CREATE TABLE IF NOT EXISTS PASSAGEIROS (
+    PASSAGEIRO_ID INT PRIMARY KEY AUTO_INCREMENT,
+    NOME VARCHAR(100) NOT NULL,
+    CPF VARCHAR(14) UNIQUE NOT NULL
+);
 
--- Modificar o tipo de dado da coluna "passageiros" na tabela VOOS
-ALTER TABLE VOOS MODIFY passageiros SMALLINT;
+-- Índice para busca rápida por CPF em PASSAGEIROS
+CREATE INDEX idx_cpf ON PASSAGEIROS (CPF);
 
--- Renomear uma coluna da tabela VOOS
-ALTER TABLE VOOS CHANGE COLUMN tempo_estimado duracao_voo INT;
+-- Tabela RESERVAS
+CREATE TABLE IF NOT EXISTS RESERVAS (
+    RESERVA_ID INT PRIMARY KEY AUTO_INCREMENT,
+    PASSAGEIRO_ID INT,
+    VOO_ID INT,
+    DATA_RESERVA DATE NOT NULL,
+    FOREIGN KEY (PASSAGEIRO_ID) REFERENCES PASSAGEIROS(PASSAGEIRO_ID),
+    FOREIGN KEY (VOO_ID) REFERENCES VOOS(VOO_ID)
+);
 
--- Adicionar um índice na coluna "origem" da tabela VOOS
-ALTER TABLE VOOS ADD INDEX idx_origem (origem);
--- ETAPA 5: COMANDO DROP
+-- Visão para listar as reservas de cada passageiro com dados do voo
+CREATE VIEW vista_reservas AS
+SELECT 
+    PASSAGEIROS.NOME AS Passageiro,
+    VOOS.NUMERO_VOO AS NumeroVoo,
+    VOOS.DESTINO AS Destino,
+    VOOS.ORIGEM AS Origem,
+    RESERVAS.DATA_RESERVA AS DataReserva
+FROM RESERVAS
+JOIN PASSAGEIROS ON RESERVAS.PASSAGEIRO_ID = PASSAGEIROS.PASSAGEIRO_ID
+JOIN VOOS ON RESERVAS.VOO_ID = VOOS.VOO_ID;
 
--- 3. DROP: Remover objetos do banco de dados
--- Remover uma tabela
-DROP TABLE AERONAVES;
+-- ALTER para modificar tabelas
+-- Adicionar coluna em AERONAVES
+ALTER TABLE AERONAVES ADD ANO_FABRICACAO YEAR;
 
--- Remover um índice da tabela VOOS
-DROP INDEX idx_origem ON VOOS;
+-- Remover coluna em VOOS
+ALTER TABLE VOOS DROP COLUMN ORIGEM;
 
--- 4. TRUNCATE: Limpar todos os dados de uma tabela
+-- Modificar tipo de coluna em PASSAGEIROS
+ALTER TABLE PASSAGEIROS MODIFY COLUMN CPF VARCHAR(11);
+
+-- Renomear coluna em RESERVAS
+ALTER TABLE RESERVAS CHANGE COLUMN DATA_RESERVA DATA_VIAGEM DATE;
+
+-- RENAME para renomear uma tabela
+RENAME TABLE PASSAGEIROS TO CLIENTES;
+
+-- TRUNCATE para limpar dados das tabelas
+TRUNCATE TABLE AERONAVES;
 TRUNCATE TABLE VOOS;
+TRUNCATE TABLE CLIENTES;
+TRUNCATE TABLE RESERVAS;
 
--- 5. RENAME: Renomear um objeto
--- Renomear a tabela VOOS para VOOS_INTERNACIONAIS
-RENAME TABLE VOOS TO VOOS_INTERNACIONAIS;
+-- DROP para remover objetos do banco de dados
+-- Remover o banco de dados
+DROP DATABASE IF EXISTS COMPANHIA_AEREA;
 
--- 6. COMMENT: Adicionar comentários para documentação
--- Adicionar comentário para a tabela
-ALTER TABLE VOOS_INTERNACIONAIS COMMENT = 'Tabela que armazena voos internacionais da companhia aérea';
+-- Remover tabelas
+DROP TABLE IF EXISTS AERONAVES;
+DROP TABLE IF EXISTS VOOS;
+DROP TABLE IF EXISTS CLIENTES;
+DROP TABLE IF EXISTS RESERVAS;
 
--- Adicionar comentário para uma coluna
-ALTER TABLE VOOS_INTERNACIONAIS MODIFY companhia VARCHAR(100) COMMENT 'Nome da companhia aérea';
+-- Remover índices
+DROP INDEX idx_modelo ON AERONAVES;
+DROP INDEX idx_numero_voo ON VOOS;
+DROP INDEX idx_cpf ON CLIENTES;
+
+-- Remover visões
+DROP VIEW IF EXISTS vista_reservas;
