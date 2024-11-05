@@ -43,45 +43,69 @@ CREATE TABLE IF NOT EXISTS RESERVAS (
 INSERT INTO AERONAVES (MODELO, CAPACIDADE) VALUES
 ('Boeing 737', 180),
 ('Airbus A320', 160),
-('Embraer E190', 110);
+('Embraer E190', 110),
+('Boeing 787', 250),
+('Airbus A350', 300);
 
 -- Inserir dados na tabela VOOS
 INSERT INTO VOOS (NUMERO_VOO, DESTINO, AERONAVE_ID) VALUES
 ('AA123', 'Rio de Janeiro', 1),
 ('LA456', 'São Paulo', 2),
-('G3789', 'Salvador', 3);
+('G3789', 'Salvador', 3),
+('AB101', 'Curitiba', 4),
+('ZZ202', 'Florianópolis', 5);
 
 -- Inserir dados na tabela CLIENTES
 INSERT INTO CLIENTES (NOME, CPF) VALUES
 ('Maria Silva', '12345678901'),
 ('João Oliveira', '23456789012'),
-('Ana Santos', '34567890123');
+('Ana Santos', '34567890123'),
+('Carlos Pereira', '45678901234'),
+('Fernanda Lima', '56789012345');
 
 -- Inserir dados na tabela RESERVAS
 INSERT INTO RESERVAS (PASSAGEIRO_ID, VOO_ID, DATA_VIAGEM) VALUES
 (1, 1, '2024-11-15'),
 (2, 2, '2024-11-20'),
-(3, 3, '2024-11-25');
+(3, 3, '2024-11-25'),
+(4, 4, '2024-12-01'),
+(5, 5, '2024-12-05');
 
 -- Atualizar dados na tabela AERONAVES
 UPDATE AERONAVES
 SET CAPACIDADE = 190
 WHERE MODELO = 'Boeing 737';
 
+UPDATE AERONAVES
+SET MODELO = 'Airbus A320 Neo'
+WHERE AERONAVE_ID = 2;
+
 -- Atualizar dados na tabela VOOS
 UPDATE VOOS
 SET DESTINO = 'Florianópolis'
-WHERE NUMERO_VOO = 'LA456';
+WHERE NUMERO_VOO = 'ZZ202';
+
+UPDATE VOOS
+SET AERONAVE_ID = 3
+WHERE NUMERO_VOO = 'AA123';
 
 -- Atualizar dados na tabela CLIENTES
 UPDATE CLIENTES
 SET NOME = 'Maria Oliveira'
 WHERE CPF = '12345678901';
 
+UPDATE CLIENTES
+SET NOME = 'Ana Paula Santos'
+WHERE PASSAGEIRO_ID = 3;
+
 -- Atualizar dados na tabela RESERVAS
 UPDATE RESERVAS
 SET DATA_VIAGEM = '2024-11-30'
 WHERE RESERVA_ID = 2;
+
+UPDATE RESERVAS
+SET VOO_ID = 4
+WHERE PASSAGEIRO_ID = 5;
 
 -- Excluir dados na tabela AERONAVES
 DELETE FROM AERONAVES
@@ -98,3 +122,5 @@ WHERE CPF = '23456789012';
 -- Excluir dados na tabela RESERVAS
 DELETE FROM RESERVAS
 WHERE RESERVA_ID = 1;
+
+
